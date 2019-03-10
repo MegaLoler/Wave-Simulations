@@ -10,11 +10,11 @@
 
 SCREEN_SIZE = 500, 200
 STRING_RES = SCREEN_SIZE[0]
-WAVE_VELOCITY = .25 # in units of the length of the string (width of screen) per second
+WAVE_VELOCITY = 0.25 # in units of the length of the string (width of screen) per second
 FPS = 60
-ORIGIN_COLOR = (63, 63, 63) # color of the line through the middle of the screen
-COMPONENT_COLOR = (0, 127, 0) # color of individual strings
-SUM_COLOR = (255, 0, 0) # color of sum of strings
+ORIGIN_COLOR =    (63, 63, 63) # color of the line through the middle of the screen
+COMPONENT_COLOR = (0, 63, 127) # color of individual strings
+SUM_COLOR =       (255, 0, 0) # color of sum of strings
 
 
 
@@ -55,7 +55,7 @@ def draw_string(window, wave_function, time, color=(255, 255, 255)):
 
     def point(i):
         ''' return the on-screen coordinates for a point on the string '''
-        displacement = wave_function(i / STRING_RES, time) / len(wave_functions)
+        displacement = wave_function(i / STRING_RES, time)# / len(wave_functions)
         h = SCREEN_SIZE[1] / 2
         x, y = i * SCREEN_SIZE[0] / STRING_RES, h + displacement * h
         return x, y
@@ -74,13 +74,9 @@ def set_wave_functions(*funcs):
     wave_function = wave_sum(*tuple(map(lambda f: f[0], funcs)))
 
 # define the functions to draw here dude
-import random
-a = lambda t: math.sin(t * math.pi)
-scribble = lambda t: random.random() * 2 - 1
 set_wave_functions(
-        wave_func(math.sin, amp=1, freq=1, phase=.0, fperiod=2*math.pi, color=(0, 127, 0)),
-        wave_func(math.sin, amp=a, freq=2, phase=.0, fperiod=2*math.pi, color=(0, 127, 0)),
-        wave_func(scribble, amp=a, freq=1, phase=.0, fperiod=1,         color=(0, 63, 127)),
+        *map(lambda i: wave_func(math.sin, amp=.5/i, freq=i/2, phase=.0, fperiod=2*math.pi),
+            range(1, 20))
         )
 
 
