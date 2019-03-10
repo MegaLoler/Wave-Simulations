@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # simulate a transverse wave on a string in 2d space
+# using spring forces
 # this will be a live numerical solution
 
 
@@ -9,10 +10,12 @@
 
 SCREEN_SIZE = 500, 200
 STRING_RES = SCREEN_SIZE[0]
-WAVE_VELOCITY = 0.25 # in units of the length of the string (width of screen) per second
 FPS = 60
+SWEEPS = 20 # screen widths per second
 ORIGIN_COLOR = (63, 63, 63) # color of the line through the middle of the screen
 STRING_COLOR = (255, 0, 0) # color of the string
+SPRING_STRENGTH = .5
+SPRING_DAMPING = .05
 
 
 
@@ -48,9 +51,14 @@ class String:
             ('c3B', color * res),
             )
 
-    def spring(self, a, ap, b, bp):
-        ''' return acceleration due to spring '''
-        
+    def spring(self, a, pa, b, pb, k=SPRING_STRENGTH, c=SPRING_DAMPING):
+        ''' return the acceleration due to a spring between a and b on a '''
+        f = (b - a) * k * .5 # restoring force
+        va = a - pa # a velocity
+        vb = b - pb # b velocity
+        v = vb - va # b relative velocity
+        d = c * v # damping force
+        return f + d # ignoring mass differences
 
     def update(self, t, dt):
         ''' update the simulation '''
@@ -58,23 +66,22 @@ class String:
         # backup the current state
         current_state = list(self.points)
 
-        # set the end to the wave function
-        self.points[0] = self.function(t)
-
         # update the rest of the displacement points
-        new_state = list()
-        for i, p, x in zip(len(self.points), self.points_p, self.points):
+        new_state = [self.function(t)]
+        for i, p, x in zip(range(len(self.points)), self.points_p, self.points):
             v = x - p # velocity
             a = 0 # acceleration
             if i < len(self.points) - 1:
                 r = self.points[i + 1]
                 rp = self.points_p[i + 1]
-                a += self.spring(x, p, r, rp, dt)
+                a += self.spring(x, p, r, rp)
             if i > 0:
                 l = self.points[i - 1]
                 lp = self.points_p[i - 1]
-                a += self.spring(x, p, l, lp, dt)
-            new_state.append(x + v + a * dt ** 2)
+                a += self.spring(x, p, l, lp)
+            if i > 0 and i < len(self.points) - 1:
+                new_state.append(x + v + a)# * dt ** 2)
+        new_state.append(0)
 
         # set the new state
         self.points = new_state
@@ -107,9 +114,14 @@ def on_draw():
     simulation.draw(window)
 
 def update(dt):
-    simulation.update(time.time(), dt)
+    for i in range(SWEEPS):
+        simulation.update(time.time() - start_time, dt / SWEEPS)
 
-wave_func = lambda t: math.sin(t * 2 * math.pi)
+start_time = time.time()
+
+#wave_func = lambda t: math.sin(t * 2 * math.pi) * 0.5
+#wave_func = lambda t: 0.5 if t > 1 and t < 1.5 else 0
+wave_func = lambda t: ((t % 1) * 2 - 1) * 0.25
 simulation = String(STRING_RES, wave_func)
 
 pyglet.clock.schedule_interval(update, 1 / FPS)
