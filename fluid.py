@@ -296,7 +296,9 @@ class Simulation:
             # append the color for it
             # TODO: better, more general visualization
             value = max(0, min(255, int(node.rho * 255) - 200))
-            r = g = b = value
+            r = value
+            g = min(255, int(value ** 2 / 500))
+            b = 0
 
             # add the color to the image buffer
             image_buffer[i] = r
