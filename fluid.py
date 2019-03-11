@@ -14,6 +14,8 @@ VISCOSITY = 0.02
 MOUSE_SENSITIVITY = 0.05
 DEBUG = False
 
+
+
 ### CONSTANTS
 
 OMEGA = 1 / (3 * VISCOSITY + .5) # reciprocal relaxation time
