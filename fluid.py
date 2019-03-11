@@ -6,12 +6,12 @@
 
 ### CONFIG
 
-SCREEN_SIZE = 400, 400
+SCREEN_SIZE = 600, 600
 FPS = 60 # desired number of animation frames to render per second
 SWEEPS = 1 # number of simulation steps per frame
 DIMENSIONS = 50, 50 # dimensions of the simulation lattice
 VISCOSITY = 0.02
-MOUSE_SENSITIVITY = 0.05
+MOUSE_SENSITIVITY = 0.3
 DEBUG = False
 
 
@@ -295,7 +295,7 @@ class Simulation:
         for node in self.lattice_nodes:
             # append the color for it
             # TODO: better, more general visualization
-            value = max(0, min(255, int(node.rho * 255) - 200))
+            value = max(0, min(255, int(node.rho * 600) - 500))
             r = value
             g = min(255, int(value ** 2 / 500))
             b = 0
@@ -370,7 +370,7 @@ def main():
             x, y = int(x), int(y)
             node = simulation.lattice[y, x]
             ux, uy = node.u
-            dx, dy = dx * MOUSE_SENSITIVITY, dy * MOUSE_SENSITIVITY
+            dx, dy = dx * MOUSE_SENSITIVITY / SCREEN_SIZE[0] * DIMENSIONS[0], dy * MOUSE_SENSITIVITY / SCREEN_SIZE[1] * DIMENSIONS[1]
             node.u = dy + ux, -dx + uy
 
     def update(dt):
@@ -379,6 +379,14 @@ def main():
         # run a number of simulation steps for this frame
         for i in range(SWEEPS):
             simulation.step()
+
+        # because i feel like it lets..... null and void the eddges
+        #for x in range(DIMENSIONS[0]):
+        #    simulation.lattice[x, 0].set_equilibrium(0, 0, 1)
+        #    simulation.lattice[x, DIMENSIONS[0] - 1].set_equilibrium(0, 0, 1)
+        #for y in range(DIMENSIONS[1]):
+        #    simulation.lattice[0, y].set_equilibrium(0, 0, 1)
+        #    simulation.lattice[DIMENSIONS[1] - 1, y].set_equilibrium(0, 0, 1)
 
         # show some useful information
         if DEBUG:
